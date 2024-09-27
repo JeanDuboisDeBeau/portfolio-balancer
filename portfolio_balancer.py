@@ -14,14 +14,11 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from pulp import (
     LpProblem, LpVariable, LpMinimize, lpSum,
-    LpBinary, LpInteger, LpContinuous, PULP_CBC_CMD
+    LpBinary, LpInteger, LpContinuous, PULP_CBC_CMD, LpStatus
 )
 import os
 
-def portfolio_balancer(portfolio_file, total_amount, max_transactions):
-    # Load data from a CSV file
-    portfolio_df = pd.read_csv(portfolio_file)
-
+def portfolio_balancer(portfolio_df, total_amount, max_transactions, solver_time_limit):
     # Convert target allocation percentages to proportions (between 0 and 1)
     portfolio_df['Target Allocation'] = portfolio_df['Target Allocation'] / 100
 
@@ -114,11 +111,14 @@ def portfolio_balancer(portfolio_file, total_amount, max_transactions):
         prob += new_value - total_target_value * target_weight == total_target_value * (
             dev_plus[asset] - dev_minus[asset])
 
-    # Solve the problem
-    prob.solve(PULP_CBC_CMD(msg=False))
+    # Solve the problem with a time limit
+    prob.solve(PULP_CBC_CMD(msg=False, timeLimit=solver_time_limit))
 
     # Check if an optimal solution was found
-    if prob.status != 1:
+    solver_status = LpStatus[prob.status]
+    if solver_status == 'Not Solved':
+        return "Optimization did not complete within the time limit."
+    elif solver_status != 'Optimal':
         return "No optimal solution was found. Please check the constraints and data."
 
     # Calculate total invested amount
@@ -164,7 +164,7 @@ def portfolio_balancer(portfolio_file, total_amount, max_transactions):
     portfolio_df['Quantity Changed'] = portfolio_df['New Quantity'] != portfolio_df['Old Quantity']
     portfolio_df['Change Symbol'] = portfolio_df['Quantity Changed'].apply(lambda x: '→' if x else '')
 
-    # Prepare the DataFrame for display by making a copy to avoid warnings
+    # Prepare the DataFrame for display
     display_df = portfolio_df[[
         'Asset', 'Old Quantity', 'New Quantity', 'Change Symbol',
         'Old Weight', 'New Weight', 'Target Allocation'
@@ -240,6 +240,7 @@ def run_gui():
         portfolio_file = portfolio_entry.get()
         total_amount = amount_entry.get()
         max_transactions = transactions_entry.get()
+        solver_time_limit = solver_time_entry.get()
 
         if not os.path.isfile(portfolio_file):
             messagebox.showerror("Error", "Please select a valid portfolio CSV file.")
@@ -248,12 +249,24 @@ def run_gui():
         try:
             total_amount = float(total_amount)
             max_transactions = int(max_transactions)
+            solver_time_limit = float(solver_time_limit)
         except ValueError:
-            messagebox.showerror("Error", "Please enter valid numeric values for amount and transactions.")
+            messagebox.showerror("Error", "Please enter valid numeric values for amount, transactions, and solver time.")
             return
 
         try:
-            results = portfolio_balancer(portfolio_file, total_amount, max_transactions)
+            portfolio_df = pd.read_csv(portfolio_file)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to read the portfolio CSV file: {str(e)}")
+            return
+
+        num_positions = portfolio_df.shape[0]
+        if max_transactions > num_positions:
+            messagebox.showerror("Error", f"The maximum number of transactions ({max_transactions}) cannot exceed the number of positions ({num_positions}).")
+            return
+
+        try:
+            results = portfolio_balancer(portfolio_df, total_amount, max_transactions, solver_time_limit)
             results_text.config(state=tk.NORMAL)  # Allow editing to update the text
             results_text.delete(1.0, tk.END)
             results_text.insert(tk.END, results)
@@ -283,17 +296,27 @@ def run_gui():
     portfolio_button = tk.Button(portfolio_frame, text="Browse", command=select_file)
     portfolio_button.pack(side=tk.LEFT, padx=5)
 
+    # Parameters frame
+    parameters_frame = tk.Frame(left_frame)
+    parameters_frame.pack(pady=10)
+
     # Total amount input
-    amount_label = tk.Label(left_frame, text="Total Amount to Invest (€):")
-    amount_label.pack(pady=5, anchor='w')
-    amount_entry = tk.Entry(left_frame, width=20)
-    amount_entry.pack()
+    amount_label = tk.Label(parameters_frame, text="Total Amount to Invest (€):")
+    amount_entry = tk.Entry(parameters_frame, width=20)
+    amount_label.grid(row=0, column=0, sticky='e', padx=5, pady=5)
+    amount_entry.grid(row=0, column=1, sticky='w', padx=5, pady=5)
 
     # Max transactions input
-    transactions_label = tk.Label(left_frame, text="Maximum Number of Transactions:")
-    transactions_label.pack(pady=5, anchor='w')
-    transactions_entry = tk.Entry(left_frame, width=20)
-    transactions_entry.pack()
+    transactions_label = tk.Label(parameters_frame, text="Maximum Number of Transactions:")
+    transactions_entry = tk.Entry(parameters_frame, width=20)
+    transactions_label.grid(row=1, column=0, sticky='e', padx=5, pady=5)
+    transactions_entry.grid(row=1, column=1, sticky='w', padx=5, pady=5)
+
+    # Max solver time input
+    solver_time_label = tk.Label(parameters_frame, text="Maximum Solver Time (seconds):")
+    solver_time_entry = tk.Entry(parameters_frame, width=20)
+    solver_time_label.grid(row=2, column=0, sticky='e', padx=5, pady=5)
+    solver_time_entry.grid(row=2, column=1, sticky='w', padx=5, pady=5)
 
     # Run button
     run_button = tk.Button(left_frame, text="Run Optimization", command=run_optimization)
@@ -320,6 +343,7 @@ def run_gui():
         "- Ensure that the sum of 'Target Allocation' percentages equals 100%.\n"
         "- Fill in the 'Total Amount to Invest' with the amount you wish to allocate.\n"
         "- Specify the 'Maximum Number of Transactions' you're willing to make.\n"
+        "- Set the 'Maximum Solver Time' to control the optimization duration.\n"
         "- Click 'Run Optimization' to get the recommended purchases."
     )
     instructions_text.insert(tk.END, instructions)
