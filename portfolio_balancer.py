@@ -148,7 +148,7 @@ def portfolio_balancer(portfolio_df, total_amount, max_transactions, solver_time
                 results += f"- Buy {purchase_quantity} shares of {asset} for {investment_cost:.2f} €\n"
 
     # Total invested amount and proportion invested
-    percentage_invested = (total_invested / total_amount) * 100
+    percentage_invested = (total_invested / total_amount) * 100 if total_amount > 0 else 0
     results += (f"\nTotal amount invested: {total_invested:.2f} € "
                 f"({percentage_invested:.2f}% of the amount to invest)\n")
 
@@ -158,7 +158,7 @@ def portfolio_balancer(portfolio_df, total_amount, max_transactions, solver_time
     ]
     portfolio_df['New Value'] = portfolio_df['New Quantity'] * portfolio_df['Price']
     new_portfolio_value = portfolio_df['New Value'].sum()
-    portfolio_df['New Weight'] = portfolio_df['New Value'] / new_portfolio_value
+    portfolio_df['New Weight'] = portfolio_df['New Value'] / new_portfolio_value if new_portfolio_value > 0 else 0
 
     # Compare old and new quantities and weights
     portfolio_df['Quantity Changed'] = portfolio_df['New Quantity'] != portfolio_df['Old Quantity']
@@ -234,6 +234,17 @@ def run_gui():
         )
         portfolio_entry.delete(0, tk.END)
         portfolio_entry.insert(0, file_path)
+
+    # Clear all fields
+    def clear_fields():
+        portfolio_entry.delete(0, tk.END)
+        amount_entry.delete(0, tk.END)
+        transactions_entry.delete(0, tk.END)
+        solver_time_entry.delete(0, tk.END)
+        solver_time_entry.insert(0, '10')  # Reset solver time to default
+        results_text.config(state=tk.NORMAL)
+        results_text.delete(1.0, tk.END)
+        results_text.config(state=tk.DISABLED)
 
     # Run the optimization
     def run_optimization():
@@ -317,10 +328,19 @@ def run_gui():
     solver_time_entry = tk.Entry(parameters_frame, width=20)
     solver_time_label.grid(row=2, column=0, sticky='e', padx=5, pady=5)
     solver_time_entry.grid(row=2, column=1, sticky='w', padx=5, pady=5)
+    solver_time_entry.insert(0, '10')  # Default solver time to 10 seconds
+
+    # Buttons frame
+    buttons_frame = tk.Frame(left_frame)
+    buttons_frame.pack(pady=10)
 
     # Run button
-    run_button = tk.Button(left_frame, text="Run Optimization", command=run_optimization)
-    run_button.pack(pady=10)
+    run_button = tk.Button(buttons_frame, text="Run Optimization", command=run_optimization)
+    run_button.pack(side=tk.LEFT, padx=5)
+
+    # Clear button
+    clear_button = tk.Button(buttons_frame, text="Clear Fields", command=clear_fields, fg='red')
+    clear_button.pack(side=tk.LEFT, padx=5)
 
     # Right Frame - Instructions
     instructions_label = tk.Label(right_frame, text="Instructions:", font=('Arial', 12, 'bold'))
@@ -350,9 +370,8 @@ def run_gui():
     instructions_text.config(state=tk.DISABLED, bg='lightgray')
 
     # Results display
-    results_label = tk.Label(root, text="Results:")
-    results_label.pack()
-    results_text = tk.Text(root, wrap=tk.WORD, width=140, height=25)
+    # Removed the 'Results:' label as per the request
+    results_text = tk.Text(root, wrap=tk.WORD, width=147, height=25)
     results_text.pack(pady=5)
     results_text.config(state=tk.DISABLED)
 
