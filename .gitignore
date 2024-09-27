@@ -21,3 +21,4 @@ perso.csv
 # build files
 build/
 dist/
+portfolio_balancer.spec
