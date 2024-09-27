@@ -1,0 +1,19 @@
+# Fichiers Python compilés
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environnements virtuels
+venv/
+env/
+.venv/
+
+# Fichiers de configuration des IDE
+.idea/
+.vscode/
+
+# Fichiers de cache
+.DS_Store
+
+# fichier persos
+perso.csv
