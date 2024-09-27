@@ -41,6 +41,9 @@ def portfolio_balancer(portfolio_file, total_amount, max_transactions):
     portfolio_df['Old Quantity'] = portfolio_df['Quantity']
     portfolio_df['Old Weight'] = portfolio_df['Current Weight']
 
+    # Calculate deviation before rebalancing
+    portfolio_df['Deviation Before (%)'] = abs(portfolio_df['Old Weight'] * 100 - portfolio_df['Target Allocation'] * 100)
+
     # Initialize the optimization problem
     prob = LpProblem("Portfolio_Rebalancing", LpMinimize)
 
@@ -170,31 +173,33 @@ def portfolio_balancer(portfolio_file, total_amount, max_transactions):
     # Convert weights to percentages
     display_df['Old Weight (%)'] = display_df['Old Weight'] * 100
     display_df['New Weight (%)'] = display_df['New Weight'] * 100
-    display_df['Target Allocation (%)'] = display_df['Target Allocation'] * 100
+    display_df['Target Allocation (%)'] = portfolio_df['Target Allocation'] * 100
 
-    # Calculate deviation from target allocation
-    display_df['Deviation (%)'] = abs(display_df['New Weight (%)'] - display_df['Target Allocation (%)'])
+    # Calculate deviation from target allocation after rebalancing
+    display_df['Deviation After (%)'] = abs(display_df['New Weight (%)'] - display_df['Target Allocation (%)'])
 
-    # Calculate the allocation index (1 - sum of absolute deviations / 200)
-    allocation_index = 1 - display_df['Deviation (%)'].sum() / 200
+    # Calculate allocation indices
+    allocation_index_before = 1 - portfolio_df['Deviation Before (%)'].sum() / 200
+    allocation_index_after = 1 - display_df['Deviation After (%)'].sum() / 200
 
     # Reorder columns for better presentation
     display_df = display_df[[
         'Asset', 'Old Quantity', 'New Quantity', 'Change Symbol',
-        'Old Weight (%)', 'New Weight (%)', 'Target Allocation (%)', 'Deviation (%)'
+        'Old Weight (%)', 'New Weight (%)', 'Target Allocation (%)', 'Deviation After (%)'
     ]]
 
     # Rename columns for better readability
     display_df.columns = [
-        'Asset', 'Old Quantity', 'New Quantity', 'Change',
-        'Old Weight (%)', 'New Weight (%)', 'Target Allocation (%)', 'Deviation (%)'
+        'Asset', 'Old Qty', 'New Qty', 'Change',
+        'Old Weight (%)', 'New Weight (%)', 'Target Allocation (%)', 'Deviation After (%)'
     ]
 
     # Convert the DataFrame to a string
     results += "\nComparison of old and new positions:\n"
     results += display_df.to_string(index=False)
-    results += (f"\n\nAllocation index: {allocation_index:.4f} "
-                f"(1 indicates a perfect match with the target allocation)")
+    results += (f"\n\nPrevious Allocation Index: {allocation_index_before:.4f}")
+    results += (f"\nNew Allocation Index: {allocation_index_after:.4f}")
+    results += "\n(An allocation index closer to 1 indicates a better match with the target allocation)"
 
     return results
 
@@ -249,8 +254,10 @@ def run_gui():
 
         try:
             results = portfolio_balancer(portfolio_file, total_amount, max_transactions)
+            results_text.config(state=tk.NORMAL)  # Allow editing to update the text
             results_text.delete(1.0, tk.END)
             results_text.insert(tk.END, results)
+            results_text.config(state=tk.DISABLED)  # Disable editing again
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
@@ -316,13 +323,14 @@ def run_gui():
         "- Click 'Run Optimization' to get the recommended purchases."
     )
     instructions_text.insert(tk.END, instructions)
-    instructions_text.config(state=tk.DISABLED)
+    instructions_text.config(state=tk.DISABLED, bg='lightgray')
 
     # Results display
     results_label = tk.Label(root, text="Results:")
     results_label.pack()
     results_text = tk.Text(root, wrap=tk.WORD, width=140, height=25)
     results_text.pack(pady=5)
+    results_text.config(state=tk.DISABLED)
 
     root.mainloop()
 
