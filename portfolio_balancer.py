@@ -205,7 +205,7 @@ def run_gui():
 
     # Desired window size
     desired_width = 1200
-    desired_height = 600
+    desired_height = 800
 
     # Get screen size
     screen_width = root.winfo_screenwidth()
@@ -220,7 +220,8 @@ def run_gui():
         # Make the window full screen if it doesn't fit
         root.geometry(f"{screen_width}x{screen_height}+0+0")
 
-    # Portfolio file selection
+    # Define functions before they are used
+    # Portfolio file selection function
     def select_file():
         file_path = filedialog.askopenfilename(
             title="Select Portfolio CSV File",
@@ -253,10 +254,22 @@ def run_gui():
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
+    # Create the main frames
+    upper_frame = tk.Frame(root)
+    upper_frame.pack(fill=tk.X, padx=10, pady=10)
+
+    left_frame = tk.Frame(upper_frame)
+    left_frame.pack(side=tk.LEFT, fill=tk.Y)
+
+    right_frame = tk.Frame(upper_frame)
+    right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+    # Left Frame - Input Fields and Buttons
+
     # Portfolio file input
-    portfolio_label = tk.Label(root, text="Portfolio CSV File:")
-    portfolio_label.pack(pady=5)
-    portfolio_frame = tk.Frame(root)
+    portfolio_label = tk.Label(left_frame, text="Portfolio CSV File:")
+    portfolio_label.pack(pady=5, anchor='w')
+    portfolio_frame = tk.Frame(left_frame)
     portfolio_frame.pack()
     portfolio_entry = tk.Entry(portfolio_frame, width=50)
     portfolio_entry.pack(side=tk.LEFT)
@@ -264,25 +277,51 @@ def run_gui():
     portfolio_button.pack(side=tk.LEFT, padx=5)
 
     # Total amount input
-    amount_label = tk.Label(root, text="Total Amount to Invest (€):")
-    amount_label.pack(pady=5)
-    amount_entry = tk.Entry(root, width=20)
+    amount_label = tk.Label(left_frame, text="Total Amount to Invest (€):")
+    amount_label.pack(pady=5, anchor='w')
+    amount_entry = tk.Entry(left_frame, width=20)
     amount_entry.pack()
 
     # Max transactions input
-    transactions_label = tk.Label(root, text="Maximum Number of Transactions:")
-    transactions_label.pack(pady=5)
-    transactions_entry = tk.Entry(root, width=20)
+    transactions_label = tk.Label(left_frame, text="Maximum Number of Transactions:")
+    transactions_label.pack(pady=5, anchor='w')
+    transactions_entry = tk.Entry(left_frame, width=20)
     transactions_entry.pack()
 
     # Run button
-    run_button = tk.Button(root, text="Run Optimization", command=run_optimization)
+    run_button = tk.Button(left_frame, text="Run Optimization", command=run_optimization)
     run_button.pack(pady=10)
+
+    # Right Frame - Instructions
+    instructions_label = tk.Label(right_frame, text="Instructions:", font=('Arial', 12, 'bold'))
+    instructions_label.pack(anchor='nw')
+    instructions_text = tk.Text(right_frame, wrap=tk.WORD, width=60, height=18)
+    instructions_text.pack(pady=5, fill=tk.BOTH, expand=True)
+
+    instructions = (
+        "Please prepare your portfolio CSV file with the following columns:\n\n"
+        "1. Asset: The name or ticker of the asset.\n"
+        "2. Quantity: The number of shares currently held.\n"
+        "3. Price: The current price per share.\n"
+        "4. Target Allocation: Desired percentage alloc. for the asset (should sum to 100%).\n\n"
+        "Example CSV format:\n"
+        "Asset,Quantity,Price,Target Allocation\n"
+        "Asset A,10,100,50\n"
+        "Asset B,5,200,30\n"
+        "Asset C,8,150,20\n\n"
+        "Instructions:\n"
+        "- Ensure that the sum of 'Target Allocation' percentages equals 100%.\n"
+        "- Fill in the 'Total Amount to Invest' with the amount you wish to allocate.\n"
+        "- Specify the 'Maximum Number of Transactions' you're willing to make.\n"
+        "- Click 'Run Optimization' to get the recommended purchases."
+    )
+    instructions_text.insert(tk.END, instructions)
+    instructions_text.config(state=tk.DISABLED)
 
     # Results display
     results_label = tk.Label(root, text="Results:")
     results_label.pack()
-    results_text = tk.Text(root, wrap=tk.WORD, width=140, height=20)
+    results_text = tk.Text(root, wrap=tk.WORD, width=140, height=25)
     results_text.pack(pady=5)
 
     root.mainloop()
