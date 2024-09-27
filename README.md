@@ -148,4 +148,4 @@ Contributions are welcome! Feel free to submit issues or pull requests to improv
 
 ## Contact
 
-For questions or assistance, please contact [github.agency178@passinbox.com].
+For questions or assistance, please [contact me](github.agency178@passinbox.com).
