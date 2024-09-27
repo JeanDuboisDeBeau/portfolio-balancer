@@ -17,3 +17,7 @@ env/
 
 # fichier persos
 perso.csv
+
+# build files
+build/
+dist/

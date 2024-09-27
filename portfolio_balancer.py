@@ -30,6 +30,7 @@ def portfolio_balancer(portfolio_df, total_amount, max_transactions, solver_time
     # Extract information from the current portfolio
     portfolio_df['Value'] = portfolio_df['Quantity'] * portfolio_df['Price']
     portfolio_value = portfolio_df['Value'].sum()
+
     portfolio_df['Current Weight'] = portfolio_df['Value'] / portfolio_value
 
     # Calculate the total target portfolio value
