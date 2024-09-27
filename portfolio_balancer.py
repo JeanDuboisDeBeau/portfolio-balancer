@@ -12,6 +12,7 @@ License: MIT
 import pandas as pd
 import tkinter as tk
 from tkinter import filedialog, messagebox
+from tkinter import ttk  # For Scrollbar
 from pulp import (
     LpProblem, LpVariable, LpMinimize, lpSum,
     LpBinary, LpInteger, LpContinuous, PULP_CBC_CMD, LpStatus
@@ -210,7 +211,7 @@ def run_gui():
 
     # Desired window size
     desired_width = 1200
-    desired_height = 800
+    desired_height = 600
 
     # Get screen size
     screen_width = root.winfo_screenwidth()
@@ -287,13 +288,25 @@ def run_gui():
 
     # Create the main frames
     upper_frame = tk.Frame(root)
-    upper_frame.pack(fill=tk.X, padx=10, pady=10)
+    upper_frame.pack(fill=tk.BOTH, padx=10, pady=10, expand=True)
 
     left_frame = tk.Frame(upper_frame)
-    left_frame.pack(side=tk.LEFT, fill=tk.Y)
+    left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
     right_frame = tk.Frame(upper_frame)
     right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+    # Top Labels Frame
+    labels_frame = tk.Frame(upper_frame)
+    labels_frame.place(relx=0, rely=0)  # Position at the top-left corner
+
+    # Input Label
+    inputs_label = tk.Label(left_frame, text="Input:", font=('Arial', 12, 'bold'))
+    inputs_label.pack(anchor='nw')
+
+    # Instructions Label
+    instructions_label = tk.Label(right_frame, text="Instructions:", font=('Arial', 12, 'bold'))
+    instructions_label.pack(anchor='nw')
 
     # Left Frame - Input Fields and Buttons
 
@@ -342,11 +355,17 @@ def run_gui():
     clear_button = tk.Button(buttons_frame, text="Clear Fields", command=clear_fields, fg='red')
     clear_button.pack(side=tk.LEFT, padx=5)
 
-    # Right Frame - Instructions
-    instructions_label = tk.Label(right_frame, text="Instructions:", font=('Arial', 12, 'bold'))
-    instructions_label.pack(anchor='nw')
-    instructions_text = tk.Text(right_frame, wrap=tk.WORD, width=60, height=18)
+    # Right Frame - Instructions with Scrollbar
+    instructions_frame = tk.Frame(right_frame)
+    instructions_frame.pack(fill=tk.BOTH, expand=True)
+
+    instructions_scrollbar = ttk.Scrollbar(instructions_frame, orient=tk.VERTICAL)
+    instructions_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    instructions_text = tk.Text(instructions_frame, wrap=tk.WORD, width=60, height=12, yscrollcommand=instructions_scrollbar.set, bg='lightgray')
     instructions_text.pack(pady=5, fill=tk.BOTH, expand=True)
+
+    instructions_scrollbar.config(command=instructions_text.yview)
 
     instructions = (
         "Please prepare your portfolio CSV file with the following columns:\n\n"
@@ -367,13 +386,20 @@ def run_gui():
         "- Click 'Run Optimization' to get the recommended purchases."
     )
     instructions_text.insert(tk.END, instructions)
-    instructions_text.config(state=tk.DISABLED, bg='lightgray')
+    instructions_text.config(state=tk.DISABLED)
 
-    # Results display
-    # Removed the 'Results:' label as per the request
-    results_text = tk.Text(root, wrap=tk.WORD, width=147, height=25)
-    results_text.pack(pady=5)
+    # Results display with Scrollbar
+    results_frame = tk.Frame(root)
+    results_frame.pack(fill=tk.BOTH, expand=True, pady=5)
+
+    results_scrollbar = ttk.Scrollbar(results_frame, orient=tk.VERTICAL)
+    results_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    results_text = tk.Text(results_frame, wrap=tk.WORD, width=130, height=20, yscrollcommand=results_scrollbar.set)
+    results_text.pack(fill=tk.BOTH, expand=True)
     results_text.config(state=tk.DISABLED)
+
+    results_scrollbar.config(command=results_text.yview)
 
     root.mainloop()
 
