@@ -11,6 +11,7 @@ A Python script to help you rebalance your investment portfolio towards your tar
 - **Transaction Limitation**: Limits the number of transactions to reduce costs associated with trading.
 - **Minimum Investment Threshold**: Ensures that at least a specified minimum percentage of your available funds is invested.
 - **CSV Input**: Reads current portfolio positions and target allocations from a user-friendly CSV file.
+- **Full GUI**: Graphical user interface for Linux users (tested on Ubuntu 22.04)
 
 ## Installation
 
@@ -135,8 +136,6 @@ Contributions are welcome! Feel free to submit issues or pull requests to improv
 - **Fractional Shares Support**: Modify the script to handle fractional share quantities, enhancing precision in rebalancing, especially for assets like ETFs.
 
 - **Automated Data Retrieval**: Integrate financial APIs to automatically fetch current asset prices and portfolio data from brokerage accounts.
-
-- **Graphical User Interface (GUI)**: Develop a user-friendly GUI to make the tool more accessible to users unfamiliar with command-line interfaces.
 
 - **Advanced Optimization Techniques**: Incorporate more sophisticated optimization methods, such as quadratic programming, to factor in elements like risk, volatility, and transaction fees.
 
