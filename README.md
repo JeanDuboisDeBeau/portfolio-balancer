@@ -13,6 +13,10 @@ A Python script to help you rebalance your investment portfolio towards your tar
 - **CSV Input**: Reads current portfolio positions and target allocations from a user-friendly CSV file.
 - **Full GUI**: Graphical user interface for Linux users (tested on Ubuntu 22.04)
 
+### Exemple usage
+
+![img.png](img.png)
+
 ## Installation
 
 1. **Clone the repository:**
