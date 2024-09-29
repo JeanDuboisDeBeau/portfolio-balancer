@@ -3,7 +3,7 @@ import sys
 
 # Include the required packages
 build_exe_options = {
-    "packages": ["pandas", "tkinter", "pulp", "os"],  # Include necessary packages
+    "packages": ["pandas", "tkinter", "pulp", "os", "ttkthemes"],  # Include necessary packages
     "include_files": [],  # Add any additional files you need to include (e.g., CSV files)
 }
 

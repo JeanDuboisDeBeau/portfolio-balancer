@@ -18,6 +18,7 @@ from pulp import (
     LpBinary, LpInteger, LpContinuous, PULP_CBC_CMD, LpStatus
 )
 import os
+from ttkthemes import ThemedTk  # Import ThemedTk
 
 def portfolio_balancer(portfolio_df, total_amount, max_transactions, solver_time_limit):
     # Convert target allocation percentages to proportions (between 0 and 1)
@@ -207,7 +208,8 @@ def portfolio_balancer(portfolio_df, total_amount, max_transactions, solver_time
 
 # GUI Application
 def run_gui():
-    root = tk.Tk()
+    # Use ThemedTk with 'radiance' theme
+    root = ThemedTk(theme="radiance")
     root.title("Portfolio Balancer")
 
     # Desired window size
@@ -227,7 +229,6 @@ def run_gui():
         # Make the window full screen if it doesn't fit
         root.geometry(f"{screen_width}x{screen_height}+0+0")
 
-    # Define functions before they are used
     # Portfolio file selection function
     def select_file():
         file_path = filedialog.askopenfilename(
@@ -288,82 +289,81 @@ def run_gui():
             messagebox.showerror("Error", str(e))
 
     # Create the main frames
-    upper_frame = tk.Frame(root)
-    upper_frame.pack(fill=tk.BOTH, padx=10, pady=10, expand=True)
+    upper_frame = ttk.Frame(root)
+    upper_frame.pack(fill=tk.BOTH, padx=1, pady=1, expand=True)
 
-    left_frame = tk.Frame(upper_frame)
+    left_frame = ttk.Frame(upper_frame)
     left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-    right_frame = tk.Frame(upper_frame)
+    right_frame = ttk.Frame(upper_frame)
     right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
-    # Top Labels Frame
-    labels_frame = tk.Frame(upper_frame)
-    labels_frame.place(relx=0, rely=0)  # Position at the top-left corner
-
     # Input Label
-    inputs_label = tk.Label(left_frame, text="Input:", font=('Arial', 12, 'bold'))
+    inputs_label = ttk.Label(left_frame, text="Input:", font=('Arial', 12, 'bold'))
     inputs_label.pack(anchor='nw')
 
     # Instructions Label
-    instructions_label = tk.Label(right_frame, text="Instructions:", font=('Arial', 12, 'bold'))
+    instructions_label = ttk.Label(right_frame, text="Instructions:", font=('Arial', 12, 'bold'))
     instructions_label.pack(anchor='nw')
 
     # Left Frame - Input Fields and Buttons
 
     # Portfolio file input
-    portfolio_label = tk.Label(left_frame, text="Portfolio CSV File:")
+    portfolio_label = ttk.Label(left_frame, text="Portfolio CSV File:")
     portfolio_label.pack(pady=5, anchor='w')
-    portfolio_frame = tk.Frame(left_frame)
+    portfolio_frame = ttk.Frame(left_frame)
     portfolio_frame.pack()
-    portfolio_entry = tk.Entry(portfolio_frame, width=50)
+    portfolio_entry = ttk.Entry(portfolio_frame, width=50)
     portfolio_entry.pack(side=tk.LEFT)
-    portfolio_button = tk.Button(portfolio_frame, text="Browse", command=select_file)
+    portfolio_button = ttk.Button(portfolio_frame, text="Browse", command=select_file)
     portfolio_button.pack(side=tk.LEFT, padx=5)
 
     # Parameters frame
-    parameters_frame = tk.Frame(left_frame)
+    parameters_frame = ttk.Frame(left_frame)
     parameters_frame.pack(pady=10)
 
     # Total amount input
-    amount_label = tk.Label(parameters_frame, text="Total Amount to Invest (€):")
-    amount_entry = tk.Entry(parameters_frame, width=20)
+    amount_label = ttk.Label(parameters_frame, text="Total Amount to Invest (€):")
+    amount_entry = ttk.Entry(parameters_frame, width=20)
     amount_label.grid(row=0, column=0, sticky='e', padx=5, pady=5)
     amount_entry.grid(row=0, column=1, sticky='w', padx=5, pady=5)
 
     # Max transactions input
-    transactions_label = tk.Label(parameters_frame, text="Maximum Number of Transactions:")
-    transactions_entry = tk.Entry(parameters_frame, width=20)
+    transactions_label = ttk.Label(parameters_frame, text="Maximum Number of Transactions:")
+    transactions_entry = ttk.Entry(parameters_frame, width=20)
     transactions_label.grid(row=1, column=0, sticky='e', padx=5, pady=5)
     transactions_entry.grid(row=1, column=1, sticky='w', padx=5, pady=5)
 
     # Max solver time input
-    solver_time_label = tk.Label(parameters_frame, text="Maximum Solver Time (seconds):")
-    solver_time_entry = tk.Entry(parameters_frame, width=20)
+    solver_time_label = ttk.Label(parameters_frame, text="Maximum Solver Time (seconds):")
+    solver_time_entry = ttk.Entry(parameters_frame, width=20)
     solver_time_label.grid(row=2, column=0, sticky='e', padx=5, pady=5)
     solver_time_entry.grid(row=2, column=1, sticky='w', padx=5, pady=5)
     solver_time_entry.insert(0, '10')  # Default solver time to 10 seconds
 
     # Buttons frame
-    buttons_frame = tk.Frame(left_frame)
+    buttons_frame = ttk.Frame(left_frame)
     buttons_frame.pack(pady=10)
 
     # Run button
-    run_button = tk.Button(buttons_frame, text="Run Optimization", command=run_optimization)
+    run_button = ttk.Button(buttons_frame, text="Run Optimization", command=run_optimization)
     run_button.pack(side=tk.LEFT, padx=5)
 
     # Clear button
-    clear_button = tk.Button(buttons_frame, text="Clear Fields", command=clear_fields, fg='red')
+    clear_button = ttk.Button(buttons_frame, text="Clear Fields", command=clear_fields)
     clear_button.pack(side=tk.LEFT, padx=5)
 
     # Right Frame - Instructions with Scrollbar
-    instructions_frame = tk.Frame(right_frame)
+    instructions_frame = ttk.Frame(right_frame)
     instructions_frame.pack(fill=tk.BOTH, expand=True)
 
     instructions_scrollbar = ttk.Scrollbar(instructions_frame, orient=tk.VERTICAL)
     instructions_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-    instructions_text = tk.Text(instructions_frame, wrap=tk.WORD, width=60, height=12, yscrollcommand=instructions_scrollbar.set, bg='lightgray')
+    instructions_text = tk.Text(
+        instructions_frame, wrap=tk.WORD, width=60, height=12,
+        yscrollcommand=instructions_scrollbar.set, bg='lightgray'
+    )
     instructions_text.pack(pady=5, fill=tk.BOTH, expand=True)
 
     instructions_scrollbar.config(command=instructions_text.yview)
@@ -390,13 +390,16 @@ def run_gui():
     instructions_text.config(state=tk.DISABLED)
 
     # Results display with Scrollbar
-    results_frame = tk.Frame(root)
-    results_frame.pack(fill=tk.BOTH, expand=True, pady=5)
+    results_frame = ttk.Frame(root)
+    results_frame.pack(fill=tk.BOTH, expand=True, pady=0)
 
     results_scrollbar = ttk.Scrollbar(results_frame, orient=tk.VERTICAL)
     results_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-    results_text = tk.Text(results_frame, wrap=tk.WORD, width=130, height=20, yscrollcommand=results_scrollbar.set)
+    results_text = tk.Text(
+        results_frame, wrap=tk.WORD, width=130, height=20,
+        yscrollcommand=results_scrollbar.set, bg='lightgray'
+    )
     results_text.pack(fill=tk.BOTH, expand=True)
     results_text.config(state=tk.DISABLED)
 
@@ -404,5 +407,7 @@ def run_gui():
 
     root.mainloop()
 
+
 if __name__ == "__main__":
     run_gui()
+
