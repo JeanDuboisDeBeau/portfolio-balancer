@@ -15,7 +15,7 @@ A Python script to help you rebalance your investment portfolio towards your tar
 
 ### Exemple usage
 
-![img.png](img.png)
+![ScreenShot](/screenshots/latest.png)
 
 ## Installation
 
