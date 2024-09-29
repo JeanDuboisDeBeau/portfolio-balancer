@@ -17,9 +17,9 @@ A Python script to help you rebalance your investment portfolio towards your tar
 
 Below is an exemple of the starting page:
 
-![ScreenShot](tree/main/screenshots/latest.PNG)
+![ScreenShot](screenshots/latest.PNG)
 
-You can find more screenshots in ![here](https://github.com/JeanDuboisDeBeau/portfolio-balancer/tree/main/screenshots)
+You can find more screenshots in ![here](https://github.com/JeanDuboisDeBeau/portfolio-balancer/tree/main/screenshots).
 
 ## Installation
 
